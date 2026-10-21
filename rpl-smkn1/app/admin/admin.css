@@ -2,7 +2,8 @@
 .admin-shell { min-height: 100vh; display: grid; grid-template-columns: 248px minmax(0, 1fr); }
 .admin-sidebar { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; padding: 22px 16px; color: #dce9e3; background: #0d252c; }
 .admin-brand { display: flex; align-items: center; gap: 11px; padding: 4px 8px 25px; color: #f4faf5; }
-.admin-brand-icon { width: 38px; height: 38px; display: grid; place-items: center; color: #a2efda; background: #173a40; border-radius: 11px 4px; }
+.admin-brand-icon { width: 38px; height: 38px; display: grid; place-items: center; color: #a2efda; background: transparent; border-radius: 11px 4px; }
+.admin-brand-icon img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
 .admin-brand strong { display: block; font-size: 14px; letter-spacing: -.03em; }
 .admin-brand small { display: block; margin-top: 4px; color: #90aaa3; font-size: 8px; font-weight: 700; letter-spacing: .12em; }
 .admin-nav-label { padding: 17px 10px 9px; color: #78928e; font-size: 9px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
@@ -37,14 +38,14 @@
 .admin-danger { color: #fff; background: #a84040; }
 .admin-danger:hover { background: #8c2e32; }
 .admin-panel { background: #fff; border: 1px solid #e3e9e3; border-radius: 6px; box-shadow: 0 5px 20px rgba(27, 55, 44, .025); }
-.admin-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 31px; }
+.admin-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 31px; }
 .admin-stat { position: relative; overflow: hidden; padding: 21px 20px; }
 .admin-stat::after { position: absolute; right: -15px; bottom: -38px; width: 105px; height: 105px; content: ""; border: 1px solid #e3eee5; border-radius: 50%; box-shadow: 0 0 0 17px #f6faf6, 0 0 0 18px #eaf1e9; }
 .admin-stat-top { display: flex; justify-content: space-between; align-items: center; color: #0b8973; }
 .admin-stat-top span { color: #8b9994; font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
 .admin-stat-value { display: block; margin: 14px 0 4px; color: #12353a; font-family: Georgia, serif; font-size: 36px; line-height: 1; }
 .admin-stat-label { color: #788783; font-size: 10px; }
-.admin-shortcuts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 13px; margin-top: 23px; }
+.admin-shortcuts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 13px; margin-top: 23px; }
 .admin-shortcut { min-height: 84px; display: flex; align-items: center; gap: 12px; padding: 16px; transition: border-color .2s, transform .2s; }
 .admin-shortcut:hover { transform: translateY(-2px); border-color: #aadaca; }
 .admin-shortcut-icon { width: 37px; height: 37px; display: grid; place-items: center; color: #087d69; background: #e5f4e9; border-radius: 5px; }
@@ -141,7 +142,7 @@
   .admin-sidebar { position: relative; top: auto; height: auto; padding: 13px 20px; }
   .admin-brand { padding: 0; }
   .admin-nav-label, .admin-sidebar-bottom { display: none; }
-  .admin-nav { grid-template-columns: repeat(4, minmax(max-content, 1fr)); gap: 5px; margin-top: 13px; overflow-x: auto; }
+  .admin-nav { grid-template-columns: repeat(5, minmax(max-content, 1fr)); gap: 5px; margin-top: 13px; overflow-x: auto; }
   .admin-nav a { justify-content: center; min-height: 37px; padding: 0 9px; font-size: 9px; }
   .admin-nav a.active { box-shadow: inset 0 -2px #5ed3af; }
   .admin-nav a svg { width: 15px; }
@@ -164,12 +165,12 @@
   .admin-login-card { padding: 24px; }
   .admin-sidebar { padding: 11px 12px; }
   .admin-brand { padding-left: 4px; }
-  .admin-nav { grid-template-columns: repeat(4, max-content); gap: 2px; }
+  .admin-nav { grid-template-columns: repeat(5, max-content); gap: 2px; }
   .admin-nav a { gap: 5px; padding: 0 7px; font-size: 8px; }
   .admin-main { padding: 20px 13px 38px; }
   .admin-header { align-items: start; }
   .admin-header > .admin-primary { flex: 0 0 auto; padding: 0 9px; font-size: 9px; }
-  .admin-stats { gap: 8px; margin-top: 22px; }
+  .admin-stats { grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 22px; }
   .admin-stat { padding: 13px 11px; }
   .admin-stat-top span { font-size: 7px; }
   .admin-stat-value { font-size: 29px; }

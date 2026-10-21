@@ -35,18 +35,23 @@ export async function getAdminSession() {
 
   const { data, error } = await getAdminSupabase()
     .from("admin_sessions")
-    .select("id, expires_at, admins!inner(id, email, username, enabled)")
+    .select("id, expires_at, admins!inner(id, email, username, full_name, role, enabled)")
     .eq("token_hash", hashToken(token))
     .gt("expires_at", new Date().toISOString())
     .maybeSingle();
   if (error) throw new Error(`Gagal memeriksa sesi admin: ${error.message}`);
   const admin = Array.isArray(data?.admins) ? data.admins[0] : data?.admins;
   if (!admin || !admin.enabled) return null;
+  const role: "admin" | "superadmin" = String(admin.role).trim().toLowerCase() === "superadmin"
+    ? "superadmin"
+    : "admin";
 
   return {
     id: admin.id as string,
     email: admin.email as string,
     username: admin.username as string,
+    fullName: admin.full_name as string,
+    role,
   };
 }
 

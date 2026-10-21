@@ -1,4 +1,4 @@
-export type CmsCollection = "gallery" | "faq" | "articles";
+export type CmsCollection = "gallery" | "faq" | "articles" | "teachers";
 
 export type GalleryItem = {
   id: string;
@@ -40,4 +40,20 @@ export type ArticleItem = {
   updated_at: string;
 };
 
-export type CmsItem = GalleryItem | FaqItem | ArticleItem;
+export type TeacherItem = {
+  id: string;
+  full_name: string;
+  nip: string;
+  photo_url: string;
+  photo_path: string;
+  subject: string;
+  position: string;
+  education: string;
+  email: string;
+  bio: string;
+  published: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type CmsItem = GalleryItem | FaqItem | ArticleItem | TeacherItem;

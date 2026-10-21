@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     const form = await request.formData();
     const file = form.get("file");
     const folder = form.get("folder");
-    if (!(file instanceof File) || !(folder === "gallery" || folder === "articles")) {
+    if (!(file instanceof File) || !(folder === "gallery" || folder === "articles" || folder === "teachers")) {
       return NextResponse.json({ error: "Pilih file gambar yang valid." }, { status: 400 });
     }
     if (file.size === 0 || file.size > MAX_FILE_SIZE) {
@@ -68,7 +68,7 @@ export async function DELETE(request: Request) {
     const session = await getAdminSession();
     if (!session) return NextResponse.json({ error: "Silakan login kembali." }, { status: 401 });
     const path = new URL(request.url).searchParams.get("path") || "";
-    if (!/^(gallery|articles)\/[0-9a-f-]{36}\.(jpg|png|webp|avif)$/.test(path)) {
+    if (!/^(gallery|articles|teachers)\/[0-9a-f-]{36}\.(jpg|png|webp|avif)$/.test(path)) {
       return NextResponse.json({ error: "Path gambar tidak valid." }, { status: 400 });
     }
     const { error } = await getAdminSupabase().storage.from(BUCKET).remove([path]);

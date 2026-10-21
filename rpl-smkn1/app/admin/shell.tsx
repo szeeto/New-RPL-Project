@@ -3,12 +3,14 @@
 import {
   ArrowLeft,
   BookOpenText,
-  Code2,
   Images,
   LayoutDashboard,
   LogOut,
   MessageCircleQuestion,
+  ShieldCheck,
+  UserRound,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
@@ -19,13 +21,15 @@ const navItems = [
   { href: "/admin/gallery", label: "Galeri", icon: Images },
   { href: "/admin/faq", label: "FAQ", icon: MessageCircleQuestion },
   { href: "/admin/articles", label: "Artikel", icon: BookOpenText },
+  { href: "/admin/teachers", label: "Guru", icon: UserRound },
+  { href: "/admin/admins", label: "Manajemen Admin", icon: ShieldCheck, superadminOnly: true },
 ];
 
 export default function AdminShell({
   user,
   children,
 }: {
-  user: { email: string; username: string };
+  user: { email: string; username: string; role: "admin" | "superadmin" };
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -54,12 +58,12 @@ export default function AdminShell({
       <div className="admin-shell">
         <aside className="admin-sidebar">
           <Link href="/admin/dashboard" className="admin-brand">
-            <span className="admin-brand-icon"><Code2 size={21} /></span>
+            <span className="admin-brand-icon"><Image src="/logo.png" alt="" width={48} height={48} priority /></span>
             <span><strong>RPL CMS</strong><small>SMKN 1 BUKIT SUNDI</small></span>
           </Link>
           <div className="admin-nav-label">Workspace</div>
           <nav className="admin-nav" aria-label="Navigasi admin">
-            {navItems.map(({ href, label, icon: Icon }) => (
+            {navItems.filter((item) => !item.superadminOnly || user.role === "superadmin").map(({ href, label, icon: Icon }) => (
               <Link
                 href={href}
                 key={href}

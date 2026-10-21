@@ -17,13 +17,16 @@ function digest(value: string) {
 }
 
 export async function POST(request: Request) {
+  const isFormSubmission = request.headers.get("content-type")?.includes("application/x-www-form-urlencoded") ?? false;
   if (!verifyRequestOrigin(request)) {
     return NextResponse.json({ error: "Permintaan tidak valid." }, { status: 403 });
   }
 
   let raw: unknown;
   try {
-    raw = await request.json();
+    raw = isFormSubmission
+      ? Object.fromEntries(new URLSearchParams(await request.text()))
+      : await request.json();
   } catch {
     return NextResponse.json({ error: "Format permintaan tidak valid." }, { status: 400 });
   }
@@ -84,6 +87,9 @@ export async function POST(request: Request) {
     const { error: clearError } = await key.from("admin_login_attempts").delete().match(attemptKey);
     if (clearError) throw clearError;
     await createAdminSession(admin.id);
+    if (isFormSubmission) {
+      return NextResponse.redirect(new URL("/admin/dashboard", request.url), 303);
+    }
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("Admin login service error", error);

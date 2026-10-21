@@ -1,4 +1,4 @@
-import { BookOpenText, Images, MessageCircleQuestion, Plus, ArrowUpRight } from "lucide-react";
+import { BookOpenText, Images, MessageCircleQuestion, Plus, ArrowUpRight, UserRound } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import AdminShell from "../shell";
@@ -12,10 +12,11 @@ export default async function AdminDashboardPage() {
   if (!user) redirect("/admin/login");
 
   const db = getAdminSupabase();
-  const [gallery, faq, articles] = await Promise.all([
+  const [gallery, faq, articles, teachers] = await Promise.all([
     db.from("gallery").select("id", { count: "exact", head: true }),
     db.from("faq").select("id", { count: "exact", head: true }),
     db.from("articles").select("id", { count: "exact", head: true }),
+    db.from("teachers").select("id", { count: "exact", head: true }),
   ]);
   const queryError = gallery.error || faq.error || articles.error;
   if (queryError) console.error("Admin dashboard count query error", queryError);
@@ -23,6 +24,9 @@ export default async function AdminDashboardPage() {
     { label: "Galeri", count: gallery.count || 0, description: "foto tersimpan", href: "/admin/gallery", icon: Images },
     { label: "FAQ", count: faq.count || 0, description: "pertanyaan", href: "/admin/faq", icon: MessageCircleQuestion },
     { label: "Artikel", count: articles.count || 0, description: "cerita tersimpan", href: "/admin/articles", icon: BookOpenText },
+    ...(!teachers.error
+      ? [{ label: "Guru", count: teachers.count || 0, description: "profil pengajar", href: "/admin/teachers", icon: UserRound }]
+      : []),
   ];
 
   return (
@@ -45,6 +49,7 @@ export default async function AdminDashboardPage() {
               </article>
             ))}
           </div>}
+        {teachers.error && <div className="admin-alert error" role="alert">Manajemen guru belum siap. Jalankan migrasi `0003_teachers.sql` di Supabase.</div>}
         <div className="admin-nav-label" style={{ paddingLeft: 0, marginTop: 27 }}>Akses cepat</div>
         <div className="admin-shortcuts">
           {stats.map(({ label, description, href, icon: Icon }) => (

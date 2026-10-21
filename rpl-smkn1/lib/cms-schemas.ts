@@ -4,10 +4,10 @@ const text = (max: number) => z.string().trim().min(1).max(max);
 const optionalText = (max: number) => z.string().trim().max(max).default("");
 const order = z.number().int().min(0).max(100000);
 const bool = z.boolean();
-const httpUrl = z.string().url().refine((value) => {
-  const protocol = new URL(value).protocol;
-  return protocol === "http:" || protocol === "https:";
-}, "URL gambar harus menggunakan HTTP atau HTTPS.");
+const httpUrl = z.string().url().refine(
+  (value) => /^https?:\/\//i.test(value),
+  "URL gambar harus menggunakan HTTP atau HTTPS.",
+);
 
 export const gallerySchema = z.object({
   title: text(120),
@@ -40,8 +40,22 @@ export const articleSchema = z.object({
   published_at: z.string().datetime().nullable(),
 }).strict();
 
+export const teacherSchema = z.object({
+  full_name: text(160),
+  nip: optionalText(40),
+  photo_url: z.union([httpUrl, z.literal("")]),
+  photo_path: z.string().max(500),
+  subject: text(120),
+  position: optionalText(120),
+  education: optionalText(120),
+  email: z.union([z.string().email().max(254), z.literal("")]),
+  bio: optionalText(2000),
+  published: bool.default(false),
+}).strict();
+
 export const collectionSchemas = {
   gallery: gallerySchema,
   faq: faqSchema,
   articles: articleSchema,
+  teachers: teacherSchema,
 } as const;

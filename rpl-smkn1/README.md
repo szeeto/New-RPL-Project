@@ -8,8 +8,9 @@ Tailwind CSS, Supabase PostgreSQL/Storage, dan Lucide icons.
 1. Buat proyek Supabase baru.
 2. Buka **SQL Editor**, lalu jalankan seluruh file dalam
    [`supabase/migrations/`](./supabase/migrations/) secara berurutan:
-   `0001_cms.sql`, lalu `0002_faq_reordering.sql`. Migrasi membuat tabel
-   admin/sesi, percobaan login, galeri, FAQ, artikel, kebijakan RLS, trigger
+   `0001_cms.sql`, `0002_faq_reordering.sql`, `0003_teachers.sql`, lalu
+   `0004_admin_management.sql`. Migrasi membuat tabel admin/sesi, percobaan
+   login, galeri, FAQ, artikel, guru, kebijakan RLS, trigger
    timestamps, bucket publik `rpl-cms` khusus gambar, dan pengurutan FAQ atomik.
 3. Salin `.env.example` menjadi `.env.local`, kemudian isi nilai dari
    **Project Settings → API**:
@@ -52,7 +53,13 @@ dan rotasi bila pernah terpapar.
 ## CMS
 
 - `/admin/login`, `/admin/dashboard`, `/admin/gallery`, `/admin/faq`,
-  `/admin/articles`.
+  `/admin/articles`, `/admin/teachers`, dan `/admin/admins` (khusus superadmin).
+- Akun admin dikelola oleh superadmin dari `/admin/admins`. Admin baru dibuat
+  dengan password minimal 12 karakter yang langsung di-hash bcrypt; daftar
+  dan detail akun tidak pernah mengirim hash password atau data sesi. Migrasi
+  `0004_admin_management.sql` menambahkan role, nama lengkap, menjadikan akun
+  aktif tertua sebagai superadmin awal jika belum ada superadmin aktif, serta
+  menjaga agar superadmin aktif terakhir tidak dapat diturunkan atau dinonaktifkan.
 - Sesi opaque acak disimpan sebagai hash SHA-256 di database; cookie sesi
   `httpOnly`, `SameSite=Strict`, `Secure` di production, berlaku 12 jam, dan
   dihapus di database saat logout.
@@ -63,6 +70,10 @@ dan rotasi bila pernah terpapar.
 - Upload gambar hanya menerima JPEG, PNG, WebP, AVIF, memeriksa signature file,
   dan membatasi ukuran 5 MB. Bucket membaca aset publik; upload/penghapusan
   hanya melalui endpoint admin terautentikasi.
+- Profil guru dikelola melalui `/admin/teachers`; jalankan migrasi
+  `0003_teachers.sql` sebelum membuka halaman tersebut. Foto profil tersimpan
+  pada bucket `rpl-cms` di folder `teachers/`, dan hanya
+  profil berstatus terbit yang ditampilkan di bagian Guru situs publik.
 - Artikel menggunakan editor teks sederhana; isi ditampilkan sebagai teks,
   bukan HTML mentah, untuk menghindari XSS.
 - Hanya FAQ/galeri/artikel berstatus publikasi yang diambil untuk situs publik.

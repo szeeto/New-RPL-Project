@@ -18,7 +18,7 @@ const paramsSchema = z.object({
   status: z.enum(["all", "published", "draft"]).default("all"),
   sort: z.enum(["newest", "oldest", "title", "order"]).default("newest"),
 });
-const tables: CmsCollection[] = ["gallery", "faq", "articles"];
+const tables: CmsCollection[] = ["gallery", "faq", "articles", "teachers"];
 
 function validCollection(value: string): value is CmsCollection {
   return tables.includes(value as CmsCollection);
@@ -50,16 +50,18 @@ export async function GET(
     const { category } = parsed.data;
     const searchable = collection === "gallery" ? "title,description,category"
       : collection === "faq" ? "question,answer"
-        : "title,summary,category,author";
-    const orderColumn = sort === "title" ? (collection === "faq" ? "question" : "title")
+        : collection === "articles" ? "title,summary,category,author"
+          : "full_name,subject,position,nip,email";
+    const orderColumn = sort === "title" ? (collection === "faq" ? "question" : collection === "teachers" ? "full_name" : "title")
       : sort === "order" ? "sort_order"
         : sort === "oldest" ? "created_at" : collection === "articles" ? "published_at" : "created_at";
+    const categoryColumn = collection === "teachers" ? "subject" : "category";
 
     let query = getAdminSupabase()
       .from(collection)
       .select("*", { count: "exact" });
     if (search) query = query.or(searchable.split(",").map((field) => `${field}.ilike.%${escapeLike(search)}%`).join(","));
-    if (category && collection !== "faq") query = query.eq("category", category);
+    if (category && collection !== "faq") query = query.eq(categoryColumn, category);
     if (status !== "all") query = query.eq("published", status === "published");
     const ascending = sort === "oldest" || sort === "title" || sort === "order";
     const { data, count, error } = await query
@@ -69,9 +71,11 @@ export async function GET(
 
     const { data: categoryRows, error: categoryError } = collection === "faq"
       ? { data: [], error: null }
-      : await getAdminSupabase().from(collection).select("category").order("category");
+      : await getAdminSupabase().from(collection).select(categoryColumn).order(categoryColumn);
     if (categoryError) throw categoryError;
-    const categories = [...new Set((categoryRows || []).map((row) => row.category).filter(Boolean))];
+    const categories = [...new Set((categoryRows || [])
+      .map((row) => Object.values(row)[0])
+      .filter((value): value is string => typeof value === "string" && Boolean(value)))];
     return NextResponse.json({
       items: data || [],
       total: count || 0,
@@ -113,7 +117,9 @@ export async function POST(
       ? await db.from("gallery").insert(gallerySchema.parse(body)).select("*").single()
       : collection === "faq"
         ? await db.from("faq").insert(faqSchema.parse(body)).select("*").single()
-        : await db.from("articles").insert(articleSchema.parse(body)).select("*").single();
+        : collection === "articles"
+          ? await db.from("articles").insert(articleSchema.parse(body)).select("*").single()
+          : await db.from("teachers").insert(collectionSchemas.teachers.parse(body)).select("*").single();
     const { data, error } = created;
     if (error) {
       if (error.code === "23505") return NextResponse.json({ error: "Slug tersebut sudah digunakan." }, { status: 409 });

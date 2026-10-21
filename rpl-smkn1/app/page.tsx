@@ -19,39 +19,6 @@ import Link from "next/link";
 import { cmsUnavailableText, getPublicContent } from "@/lib/public-content";
 import SiteHeader from "./site-header";
 
-const teachers = [
-  {
-    name: "Reni Darlina M.Kom",
-    role: "Kepala Program Keahlian Rekayasa Perangkat Lunak",
-    initials: "RD",
-    color: "mint",
-  },
-  {
-    name: "Dewi Wulan Sari S.Kom",
-    role: "Guru Mata Pelajaran Produktif RPL",
-    initials: "DW",
-    color: "peach",
-  },
-  {
-    name: "Eva Saulina Manik S.Pd",
-    role: "Guru Mata Pelajaran Produktif RPL",
-    initials: "ES",
-    color: "lavender",
-  },
-  {
-    name: "Resti Rahmi Khairati Costa S.Pd",
-    role: "Guru Mata Pelajaran Produktif RPL",
-    initials: "RC",
-    color: "blue",
-  },
-  {
-    name: "Yolan Andrika Refi S.Pd",
-    role: "Guru Mata Pelajaran Produktif RPL",
-    initials: "YA",
-    color: "yellow",
-  },
-];
-
 const navigation = [
   ["Beranda", "#beranda"],
   ["Tentang", "#tentang"],
@@ -397,30 +364,31 @@ export default async function Home() {
               description="Kenali nama-nama pengajar program Rekayasa Perangkat Lunak."
             />
             <span className="teacher-count">
-              <Users size={17} /> {teachers.length} pengajar
+              <Users size={17} /> {content.teachers.length} pengajar
             </span>
           </div>
           <div className="teacher-grid">
-            {teachers.map((teacher, index) => (
-              <article className="teacher-card" key={teacher.name}>
+            {content.teachers.map((teacher, index) => (
+              <article className="teacher-card" key={teacher.id}>
                 <div
-                  className={`teacher-portrait ${teacher.color}`}
-                  aria-hidden="true">
-                  <span>{teacher.initials}</span>
+                  className={`teacher-portrait ${["mint", "peach", "lavender", "blue", "yellow"][index % 5]}`}
+                  aria-label={`Foto ${teacher.full_name}`}>
+                  {teacher.photo_url
+                    ? <img src={teacher.photo_url} alt={teacher.full_name} />
+                    : <span>{teacher.full_name.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase()}</span>}
                   <span className="portrait-index">RPL · 0{index + 1}</span>
                   <div className="portrait-lines" />
                 </div>
                 <div className="teacher-info">
-                  <h3>{teacher.name}</h3>
-                  <p>{teacher.role}</p>
+                  <h3>{teacher.full_name}</h3>
+                  <p>{teacher.position || teacher.subject}</p>
+                  {teacher.position && <p>{teacher.subject}</p>}
+                  {teacher.bio && <p>{teacher.bio}</p>}
                 </div>
               </article>
             ))}
           </div>
-          <p className="teacher-note">
-            Foto pengajar tidak ditampilkan karena aset foto pada situs
-            referensi tidak tersedia.
-          </p>
+          {!content.teachers.length && <p className="teacher-note">{content.teacherError || cmsUnavailableText(content)}</p>}
         </section>
 
         <section className="section showcase-section" id="galeri">

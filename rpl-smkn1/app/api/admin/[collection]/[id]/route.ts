@@ -5,7 +5,7 @@ import { getAdminSession, verifyRequestOrigin } from "@/lib/session";
 import { getAdminSupabase } from "@/lib/supabase";
 import type { CmsCollection } from "@/lib/cms-types";
 
-const tables: CmsCollection[] = ["gallery", "faq", "articles"];
+const tables: CmsCollection[] = ["gallery", "faq", "articles", "teachers"];
 const idSchema = z.string().uuid();
 
 export async function PUT(

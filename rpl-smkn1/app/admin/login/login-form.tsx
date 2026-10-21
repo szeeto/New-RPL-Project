@@ -1,6 +1,7 @@
 "use client";
 
-import { ArrowLeft, Eye, EyeOff, LoaderCircle, LockKeyhole, UserRound } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, LoaderCircle, LockKeyhole } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
@@ -42,7 +43,7 @@ export default function LoginForm() {
     <div className="admin-login-page">
       <section className="admin-login-story">
         <Link href="/" className="admin-login-logo">
-          <span className="admin-brand-icon"><UserRound size={21} /></span>
+          <span className="admin-brand-icon"><Image src="/logo.png" alt="" width={54} height={54} priority /></span>
           <span><strong>RPL CMS</strong><small>CONTENT MANAGEMENT SYSTEM</small></span>
         </Link>
         <div className="admin-login-copy">
@@ -58,7 +59,12 @@ export default function LoginForm() {
           <h2>Masuk ke dashboard</h2>
           <p>Gunakan akun admin yang telah disiapkan.</p>
           {error && <div className="admin-alert error" role="alert">{error}</div>}
-          <form className="admin-login-fields" onSubmit={submit}>
+          <form
+            className="admin-login-fields"
+            method="post"
+            action="/api/admin/login"
+            onSubmit={submit}
+          >
             <div className="admin-field">
               <label htmlFor="admin-identity">Email atau username</label>
               <input

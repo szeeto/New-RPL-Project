@@ -18,7 +18,7 @@ import {
   X,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { ArticleItem, CmsCollection, CmsItem, FaqItem, GalleryItem } from "@/lib/cms-types";
+import type { ArticleItem, CmsCollection, CmsItem, FaqItem, GalleryItem, TeacherItem } from "@/lib/cms-types";
 
 type FieldValue = string | number | boolean | null;
 type FormState = Record<string, FieldValue>;
@@ -30,6 +30,7 @@ const titles: Record<CmsCollection, { title: string; eyebrow: string; descriptio
   gallery: { title: "Kelola galeri", eyebrow: "MEDIA & KEGIATAN", description: "Unggah dokumentasi kegiatan dan karya program RPL.", singular: "foto galeri" },
   faq: { title: "Kelola FAQ", eyebrow: "INFORMASI PUBLIK", description: "Atur pertanyaan yang sering ditanyakan dan urutan tampilnya.", singular: "FAQ" },
   articles: { title: "Kelola artikel", eyebrow: "CERITA & KABAR", description: "Tulis artikel, simpan sebagai draft, dan publikasikan ke situs.", singular: "artikel" },
+  teachers: { title: "Kelola guru", eyebrow: "PENGAJAR RPL", description: "Perbarui profil pengajar yang ditampilkan pada situs publik.", singular: "guru" },
 };
 
 function initialValues(collection: CmsCollection, item?: CmsItem): FormState {
@@ -70,11 +71,30 @@ function initialValues(collection: CmsCollection, item?: CmsItem): FormState {
       published_at: article.published_at,
     };
   }
+  if (item && collection === "teachers") {
+    const teacher = item as TeacherItem;
+    return {
+      full_name: teacher.full_name,
+      nip: teacher.nip,
+      photo_url: teacher.photo_url,
+      photo_path: teacher.photo_path,
+      subject: teacher.subject,
+      position: teacher.position,
+      education: teacher.education,
+      email: teacher.email,
+      bio: teacher.bio,
+      published: teacher.published,
+    };
+  }
   if (collection === "gallery") return {
     title: "", description: "", category: "", image_url: "", image_path: "", alt_text: "",
     sort_order: 0, published: false,
   };
   if (collection === "faq") return { question: "", answer: "", sort_order: 0, published: false };
+  if (collection === "teachers") return {
+    full_name: "", nip: "", photo_url: "", photo_path: "", subject: "",
+    position: "", education: "", email: "", bio: "", published: false,
+  };
   return {
     title: "", slug: "", summary: "", content: "", category: "", author: "",
     cover_url: "", cover_path: "", published: false, published_at: null,
@@ -84,12 +104,18 @@ function initialValues(collection: CmsCollection, item?: CmsItem): FormState {
 function itemTitle(collection: CmsCollection, item: CmsItem) {
   return collection === "faq"
     ? (item as FaqItem).question
+    : collection === "teachers"
+      ? (item as TeacherItem).full_name
     : (item as GalleryItem | ArticleItem).title;
 }
 
 function itemSubtitle(collection: CmsCollection, item: CmsItem) {
   if (collection === "gallery") return (item as GalleryItem).category;
   if (collection === "articles") return `/${(item as ArticleItem).slug}`;
+  if (collection === "teachers") {
+    const teacher = item as TeacherItem;
+    return [teacher.position, teacher.subject].filter(Boolean).join(" · ");
+  }
   const answer = (item as FaqItem).answer;
   return answer.length > 95 ? `${answer.slice(0, 95)}…` : answer;
 }
@@ -102,6 +128,10 @@ function imageDetails(collection: CmsCollection, item: CmsItem) {
   if (collection === "articles") {
     const article = item as ArticleItem;
     return { url: article.cover_url, alt: article.title };
+  }
+  if (collection === "teachers") {
+    const teacher = item as TeacherItem;
+    return { url: teacher.photo_url, alt: teacher.full_name };
   }
   return { url: "", alt: "" };
 }
@@ -132,6 +162,7 @@ export default function ContentManager({ collection }: { collection: CmsCollecti
   const previewUrlRef = useRef("");
   const [saving, setSaving] = useState(false);
   const [previewArticle, setPreviewArticle] = useState<FormState | null>(null);
+  const [viewingTeacher, setViewingTeacher] = useState<TeacherItem | null>(null);
   const [formError, setFormError] = useState("");
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -186,7 +217,7 @@ export default function ContentManager({ collection }: { collection: CmsCollecti
   const currentItem = editing && editing !== "new" ? editing : null;
   const currentImageUrl = collection === "gallery"
     ? String(values.image_url || "")
-    : String(values.cover_url || "");
+    : collection === "teachers" ? String(values.photo_url || "") : String(values.cover_url || "");
   const displayedImageUrl = previewUrl || currentImageUrl;
 
   function updateField(name: string, value: FieldValue) {
@@ -238,7 +269,7 @@ export default function ContentManager({ collection }: { collection: CmsCollecti
     }
     const form = new FormData();
     form.set("file", file);
-    form.set("folder", collection === "gallery" ? "gallery" : "articles");
+    form.set("folder", collection);
     const response = await fetch("/api/admin/upload", { method: "POST", body: form });
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || "Gambar gagal diunggah.");
@@ -261,6 +292,10 @@ export default function ContentManager({ collection }: { collection: CmsCollecti
           nextValues.cover_url = uploaded.url;
           nextValues.cover_path = uploaded.path;
         }
+      } else if (selectedFile && collection === "teachers") {
+        uploaded = await uploadFile(selectedFile);
+        nextValues.photo_url = uploaded.url;
+        nextValues.photo_path = uploaded.path;
       }
       if (publish !== undefined) {
         nextValues.published = publish;
@@ -297,7 +332,9 @@ export default function ContentManager({ collection }: { collection: CmsCollecti
       if (currentItem && uploaded) {
         const oldPath = collection === "gallery"
           ? (currentItem as GalleryItem).image_path
-          : (currentItem as ArticleItem).cover_path;
+          : collection === "articles"
+            ? (currentItem as ArticleItem).cover_path
+            : (currentItem as TeacherItem).photo_path;
         if (oldPath && oldPath !== uploaded.path) {
           const removed = await fetch(`/api/admin/upload?path=${encodeURIComponent(oldPath)}`, { method: "DELETE" });
           if (!removed.ok) setToast({ text: "Konten tersimpan, tetapi gambar lama gagal dibersihkan dari Storage.", error: true });
@@ -326,6 +363,9 @@ export default function ContentManager({ collection }: { collection: CmsCollecti
         if (!removed.ok) imageWarning = " Data terhapus, tetapi file gambar belum terhapus dari Storage.";
       } else if (image.url && "cover_path" in item && item.cover_path) {
         const removed = await fetch(`/api/admin/upload?path=${encodeURIComponent(item.cover_path)}`, { method: "DELETE" });
+        if (!removed.ok) imageWarning = " Data terhapus, tetapi file gambar belum terhapus dari Storage.";
+      } else if (image.url && "photo_path" in item && item.photo_path) {
+        const removed = await fetch(`/api/admin/upload?path=${encodeURIComponent(item.photo_path)}`, { method: "DELETE" });
         if (!removed.ok) imageWarning = " Data terhapus, tetapi file gambar belum terhapus dari Storage.";
       }
       setToast({ text: `Konten berhasil dihapus.${imageWarning}`, error: Boolean(imageWarning) });
@@ -392,7 +432,7 @@ export default function ContentManager({ collection }: { collection: CmsCollecti
         <td>{collection === "faq" ? <span className="admin-order-number">{(page - 1) * PAGE_SIZE + index + 1}</span> : <span className="admin-date">{new Date(item.created_at).toLocaleDateString("id-ID")}</span>}</td>
         <td>
           <div className="admin-table-title">
-            {collection === "gallery" || collection === "articles"
+            {collection === "gallery" || collection === "articles" || collection === "teachers"
               ? image.url
                 ? <img className="admin-thumb" src={image.url} alt={image.alt} />
                 : <span className="admin-thumb-empty"><ImageIcon size={15} /></span>
@@ -403,7 +443,9 @@ export default function ContentManager({ collection }: { collection: CmsCollecti
             </span>
           </div>
         </td>
-        {collection !== "faq" && <td>{(item as GalleryItem | ArticleItem).category}</td>}
+        {collection === "gallery" || collection === "articles"
+          ? <td>{(item as GalleryItem | ArticleItem).category}</td>
+          : collection === "teachers" ? <td>{(item as TeacherItem).subject}</td> : null}
         <td><span className={`admin-badge ${isPublished ? "published" : "draft"}`}><i />{isPublished ? "Terbit" : "Draft"}</span></td>
         {collection === "faq" && (
           <td><div className="admin-row-actions">
@@ -413,6 +455,7 @@ export default function ContentManager({ collection }: { collection: CmsCollecti
         )}
         <td>
           <div className="admin-row-actions">
+            {collection === "teachers" && <button className="admin-icon-button" title="Detail guru" aria-label="Detail guru" onClick={() => setViewingTeacher(item as TeacherItem)}><Eye size={14} /></button>}
             <button className="admin-icon-button" title={isPublished ? "Jadikan draft" : "Terbitkan"} aria-label={isPublished ? "Jadikan draft" : "Terbitkan"} onClick={() => void togglePublish(item)}><Check size={14} /></button>
             <button className="admin-icon-button" title="Edit" aria-label="Edit" onClick={() => startEdit(item)}><Pencil size={14} /></button>
             <button className="admin-icon-button delete" title="Hapus" aria-label="Hapus" onClick={() => void deleteItem(item)}><Trash2 size={14} /></button>
@@ -438,11 +481,11 @@ export default function ContentManager({ collection }: { collection: CmsCollecti
       <div className="admin-panel admin-toolbar">
         <label className="admin-search">
           <Search size={15} aria-hidden="true" />
-          <input className="admin-input" value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} placeholder="Cari judul atau isi..." aria-label="Cari konten" />
+          <input className="admin-input" value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} placeholder={collection === "teachers" ? "Cari nama, bidang, atau jabatan..." : "Cari judul atau isi..."} aria-label="Cari konten" />
         </label>
         {collection !== "faq" && (
           <select className="admin-select" value={category} onChange={(event) => { setCategory(event.target.value); setPage(1); }} aria-label="Filter kategori">
-            <option value="">Semua kategori</option>
+            <option value="">{collection === "teachers" ? "Semua bidang" : "Semua kategori"}</option>
             {listing.categories.map((value) => <option value={value} key={value}>{value}</option>)}
           </select>
         )}
@@ -465,7 +508,7 @@ export default function ContentManager({ collection }: { collection: CmsCollecti
             <table className="admin-table">
               <thead><tr>
                 <th>{collection === "faq" ? "Urutan" : "Dibuat"}</th><th>Konten</th>
-                {collection !== "faq" && <th>Kategori</th>}
+                {collection !== "faq" && <th>{collection === "teachers" ? "Bidang keahlian" : "Kategori"}</th>}
                 <th>Status</th>{collection === "faq" && <th>Atur urutan</th>}<th>Aksi</th>
               </tr></thead>
               <tbody>{rows}</tbody>
@@ -533,6 +576,27 @@ export default function ContentManager({ collection }: { collection: CmsCollecti
           </article>
         </div>
       )}
+      {viewingTeacher && collection === "teachers" && (
+        <div className="admin-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setViewingTeacher(null); }}>
+          <section className="admin-modal" role="dialog" aria-modal="true" aria-labelledby="teacher-detail-title">
+            <div className="admin-modal-header">
+              <div><h2 id="teacher-detail-title">Detail guru</h2><p>Profil pengajar RPL</p></div>
+              <button className="admin-icon-button" type="button" onClick={() => setViewingTeacher(null)} aria-label="Tutup detail"><X size={17} /></button>
+            </div>
+            <div className="admin-form-grid">
+              {viewingTeacher.photo_url && <div className="admin-field full"><img className="admin-thumb" style={{ width: 96, height: 96, borderRadius: "50%" }} src={viewingTeacher.photo_url} alt={viewingTeacher.full_name} /></div>}
+              <p><strong>Nama lengkap</strong><br />{viewingTeacher.full_name}</p>
+              <p><strong>Bidang keahlian</strong><br />{viewingTeacher.subject}</p>
+              <p><strong>Jabatan</strong><br />{viewingTeacher.position || "—"}</p>
+              <p><strong>NIP</strong><br />{viewingTeacher.nip || "—"}</p>
+              <p><strong>Pendidikan</strong><br />{viewingTeacher.education || "—"}</p>
+              <p><strong>Email</strong><br />{viewingTeacher.email || "—"}</p>
+              <p className="full"><strong>Biodata</strong><br />{viewingTeacher.bio || "—"}</p>
+            </div>
+            <div className="admin-modal-footer"><div className="admin-modal-footer-right"><button className="admin-secondary" type="button" onClick={() => setViewingTeacher(null)}>Tutup</button><button className="admin-primary" type="button" onClick={() => { startEdit(viewingTeacher); setViewingTeacher(null); }}><Pencil size={14} /> Edit guru</button></div></div>
+          </section>
+        </div>
+      )}
       {toast && <div className={`admin-toast${toast.error ? " error" : ""}`} role="status">{toast.text}</div>}
     </div>
   );
@@ -555,7 +619,7 @@ function FormFields({
   previewUrl: string;
   onFile: (file: File | null) => void;
 }) {
-  const imageInput = collection === "gallery" ? "image" : "cover";
+  const imageInput = collection === "gallery" ? "image" : collection === "teachers" ? "teacher-photo" : "cover";
   return (
     <div className="admin-form-grid">
       {collection === "faq" ? (
@@ -573,6 +637,18 @@ function FormFields({
           <Field name="alt_text" label="Alt text gambar" value={String(values.alt_text || "")} onChange={(value) => updateField("alt_text", value)} required maxLength={180} />
           <ImageUpload label="Gambar galeri" previewUrl={previewUrl} file={file} onFile={onFile} inputName={imageInput} />
           <NumberField name="sort_order" label="Urutan tampil" value={Number(values.sort_order || 0)} onChange={(value) => updateField("sort_order", value)} />
+          <PublishField value={Boolean(values.published)} onChange={(value) => updateField("published", value)} />
+        </>
+      ) : collection === "teachers" ? (
+        <>
+          <Field name="full_name" label="Nama lengkap" value={String(values.full_name || "")} onChange={(value) => updateField("full_name", value)} required maxLength={160} full />
+          <Field name="nip" label="NIP (opsional)" value={String(values.nip || "")} onChange={(value) => updateField("nip", value)} maxLength={40} />
+          <Field name="subject" label="Mata pelajaran / bidang keahlian" value={String(values.subject || "")} onChange={(value) => updateField("subject", value)} required maxLength={120} />
+          <Field name="position" label="Jabatan" value={String(values.position || "")} onChange={(value) => updateField("position", value)} maxLength={120} />
+          <Field name="education" label="Pendidikan terakhir" value={String(values.education || "")} onChange={(value) => updateField("education", value)} maxLength={120} />
+          <Field name="email" label="Email (opsional)" value={String(values.email || "")} onChange={(value) => updateField("email", value)} maxLength={254} type="email" />
+          <ImageUpload label="Foto profil (opsional)" previewUrl={previewUrl || String(values.photo_url || "")} file={file} onFile={onFile} inputName={imageInput} />
+          <TextArea name="bio" label="Deskripsi / biodata singkat" value={String(values.bio || "")} onChange={(value) => updateField("bio", value)} maxLength={2000} full />
           <PublishField value={Boolean(values.published)} onChange={(value) => updateField("published", value)} />
         </>
       ) : (
@@ -605,14 +681,14 @@ function FormFields({
   );
 }
 
-function Field({ name, label, value, onChange, required, maxLength, hint, full }: {
+function Field({ name, label, value, onChange, required, maxLength, hint, full, type = "text" }: {
   name: string; label: string; value: string; onChange: (value: string) => void;
-  required?: boolean; maxLength: number; hint?: string; full?: boolean;
+  required?: boolean; maxLength: number; hint?: string; full?: boolean; type?: string;
 }) {
   return (
     <div className={`admin-field${full ? " full" : ""}`}>
       <label htmlFor={`field-${name}`}>{label}{required ? " *" : ""}</label>
-      <input className="admin-input" id={`field-${name}`} name={name} value={value} onChange={(event) => onChange(event.target.value)} maxLength={maxLength} required={required} />
+      <input className="admin-input" id={`field-${name}`} name={name} type={type} value={value} onChange={(event) => onChange(event.target.value)} maxLength={maxLength} required={required} />
       {hint && <span className="admin-field-hint">{hint}</span>}
     </div>
   );

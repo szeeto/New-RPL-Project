@@ -59,9 +59,10 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
   display: grid;
   place-items: center;
   color: #a8f2dd;
-  background: var(--navy);
+  background: transparent;
   border-radius: 11px 4px 11px 4px;
 }
+.brand-mark img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
 .brand-text { color: var(--navy); font-size: 15px; font-weight: 800; letter-spacing: -.04em; line-height: 1.1; }
 .brand-text > span { display: block; margin-top: 4px; color: #778587; font-size: 8px; font-weight: 700; letter-spacing: .11em; }
 .desktop-nav { display: flex; align-items: center; justify-content: center; flex: 1; gap: clamp(14px, 2.6vw, 35px); }
@@ -290,6 +291,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
 .teacher-portrait.blue { background: #e3ecee; color: #507a80; }
 .teacher-portrait.yellow { background: #eeeddb; color: #878046; }
 .teacher-portrait > span:first-child { position: relative; z-index: 1; width: 78px; height: 78px; display: grid; place-items: center; border: 1px solid currentColor; border-radius: 50%; font-family: Georgia, serif; font-size: 24px; }
+.teacher-portrait > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .portrait-index { position: absolute; bottom: 13px; left: 13px; z-index: 1; color: currentColor; font-family: Consolas, monospace; font-size: 8px; letter-spacing: .13em; opacity: .72; }
 .portrait-lines { position: absolute; inset: 0; opacity: .3; background: repeating-linear-gradient(135deg, transparent 0 16px, currentColor 17px, transparent 18px); mask-image: radial-gradient(ellipse, transparent 13%, #000 100%); }
 .teacher-info { min-height: 98px; padding: 15px 13px 14px; }
