@@ -537,9 +537,9 @@ export default async function Home() {
         </div>
         <div className="footer-bottom">
           <span>
-            © 2026 · Rekayasa Perangkat Lunak SMK Negeri 1 Bukit Sundi
+            © 2026 · Rekayasa Perangkat Lunak SMK Negeri 1 Bukit Sundi || Patra
+            Sawali XII RPL 2
           </span>
-          <span>Patra Sawali XII RPL 2</span>
           <a href="#beranda">Kembali ke atas ↑</a>
         </div>
       </footer>
