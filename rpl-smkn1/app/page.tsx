@@ -49,17 +49,33 @@ function SectionHeading({
   );
 }
 
-function EmptyContent({ type, message }: { type: "gallery" | "faq" | "articles"; message: string }) {
+function EmptyContent({
+  type,
+  message,
+}: {
+  type: "gallery" | "faq" | "articles";
+  message: string;
+}) {
   return (
     <div className="empty-state">
       <div className="empty-icon" aria-hidden="true">
-        {type === "gallery" ? <Layers3 size={24} /> : type === "faq" ? <Users size={24} /> : <Braces size={24} />}
+        {type === "gallery" ? (
+          <Layers3 size={24} />
+        ) : type === "faq" ? (
+          <Users size={24} />
+        ) : (
+          <Braces size={24} />
+        )}
       </div>
       <div>
-        <h3>{type === "gallery" ? "Galeri sedang disiapkan" : type === "faq" ? "Belum ada pertanyaan" : "Belum ada artikel"}</h3>
-        <p>
-          {message}
-        </p>
+        <h3>
+          {type === "gallery"
+            ? "Galeri sedang disiapkan"
+            : type === "faq"
+              ? "Belum ada pertanyaan"
+              : "Belum ada artikel"}
+        </h3>
+        <p>{message}</p>
       </div>
     </div>
   );
@@ -338,21 +354,30 @@ export default async function Home() {
               />
               <a
                 className="button button-dark"
-                href="mailto:rplsmkn1bukitsundii@gmail.com">
+                href="mailto:skansabudirpl@gmail.com">
                 Tanyakan langsung <Mail size={16} />
               </a>
             </div>
             <div className="faq-list">
-              {content.faq.length ? content.faq.map(({ id, question, answer }, index) => (
-                <details className="faq-item" key={id}>
-                  <summary>
-                    <span className="faq-number">{String(index + 1).padStart(2, "0")}</span>
-                    <span className="faq-question">{question}</span>
-                    <span className="faq-toggle" aria-hidden="true" />
-                  </summary>
-                  <p>{answer}</p>
-                </details>
-              )) : <EmptyContent type="faq" message={cmsUnavailableText(content)} />}
+              {content.faq.length ? (
+                content.faq.map(({ id, question, answer }, index) => (
+                  <details className="faq-item" key={id}>
+                    <summary>
+                      <span className="faq-number">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      <span className="faq-question">{question}</span>
+                      <span className="faq-toggle" aria-hidden="true" />
+                    </summary>
+                    <p>{answer}</p>
+                  </details>
+                ))
+              ) : (
+                <EmptyContent
+                  type="faq"
+                  message={cmsUnavailableText(content)}
+                />
+              )}
             </div>
           </div>
         </section>
@@ -374,9 +399,18 @@ export default async function Home() {
                 <div
                   className={`teacher-portrait ${["mint", "peach", "lavender", "blue", "yellow"][index % 5]}`}
                   aria-label={`Foto ${teacher.full_name}`}>
-                  {teacher.photo_url
-                    ? <img src={teacher.photo_url} alt={teacher.full_name} />
-                    : <span>{teacher.full_name.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase()}</span>}
+                  {teacher.photo_url ? (
+                    <img src={teacher.photo_url} alt={teacher.full_name} />
+                  ) : (
+                    <span>
+                      {teacher.full_name
+                        .split(/\s+/)
+                        .slice(0, 2)
+                        .map((part) => part[0])
+                        .join("")
+                        .toUpperCase()}
+                    </span>
+                  )}
                   <span className="portrait-index">RPL · 0{index + 1}</span>
                   <div className="portrait-lines" />
                 </div>
@@ -389,7 +423,11 @@ export default async function Home() {
               </article>
             ))}
           </div>
-          {!content.teachers.length && <p className="teacher-note">{content.teacherError || cmsUnavailableText(content)}</p>}
+          {!content.teachers.length && (
+            <p className="teacher-note">
+              {content.teacherError || cmsUnavailableText(content)}
+            </p>
+          )}
         </section>
 
         <div className="section showcase-section">
@@ -421,7 +459,7 @@ export default async function Home() {
             <p>Ingin mengenal program Rekayasa Perangkat Lunak lebih lanjut?</p>
             <a
               className="button button-light"
-              href="mailto:rplsmkn1bukitsundii@gmail.com">
+              href="mailto:skansabudirpl@gmail.com">
               Hubungi program RPL <ArrowUpRight size={17} />
             </a>
           </div>
@@ -471,9 +509,7 @@ export default async function Home() {
               Jalan Solok - Muaro Paneh Km. 7, Nagari Muaro Paneh, Kecamatan
               Bukit Sundi, Kabupaten Solok, Sumatera Barat
             </p>
-            <a href="mailto:rplsmkn1bukitsundii@gmail.com">
-              rplsmkn1bukitsundii@gmail.com
-            </a>
+            <a href="mailto:skansabudirpl@gmail.com">skansabudirpl@gmail.com</a>
             <div className="social-links">
               <a
                 href="https://www.instagram.com/rplsmkn1bukitsundi?igsh=MXExenU0NHM1am81YQ=="
