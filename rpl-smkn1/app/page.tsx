@@ -15,8 +15,9 @@ import {
   Sparkles,
   Users,
 } from "lucide-react";
-import Link from "next/link";
 import { cmsUnavailableText, getPublicContent } from "@/lib/public-content";
+import ArticlesSection from "./articles-section";
+import GallerySection from "./gallery-section";
 import SiteHeader from "./site-header";
 
 const navigation = [
@@ -391,7 +392,7 @@ export default async function Home() {
           {!content.teachers.length && <p className="teacher-note">{content.teacherError || cmsUnavailableText(content)}</p>}
         </section>
 
-        <section className="section showcase-section" id="galeri">
+        <div className="section showcase-section">
           <div className="showcase-heading">
             <SectionHeading
               eyebrow="04 / KEGIATAN & KARYA"
@@ -400,67 +401,17 @@ export default async function Home() {
             />
             <span className="section-code">GALLERY / JOURNAL</span>
           </div>
-          <div className="showcase-grid">
-            <div className="showcase-panel gallery-panel">
-              <div className="panel-title">
-                <span>
-                  <Layers3 size={17} /> Galeri RPL
-                </span>
-                <span className="panel-index">01 — {String(content.gallery.length).padStart(2, "0")}</span>
-              </div>
-              {content.gallery.length ? (
-                <div className="public-gallery-grid">
-                  {content.gallery.slice(0, 6).map((item) => (
-                    <article className="public-gallery-card" key={item.id}>
-                      <img src={item.image_url} alt={item.alt_text} loading="lazy" />
-                      <div>
-                        <span>{item.category}</span>
-                        <h3>{item.title}</h3>
-                        {item.description && <p>{item.description}</p>}
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              ) : <EmptyContent type="gallery" message={cmsUnavailableText(content)} />}
-              <div className="panel-decoration" aria-hidden="true">
-                <span />
-                <span />
-                <span />
-              </div>
-            </div>
-            <div className="showcase-panel article-panel" id="artikel">
-              <div className="panel-title">
-                <span>
-                  <Braces size={17} /> Blog & Artikel
-                </span>
-                <span className="panel-index">02 — {String(content.articles.length).padStart(2, "0")}</span>
-              </div>
-              {content.articles.length ? (
-                <div className="public-article-list">
-                  {content.articles.slice(0, 3).map((article) => (
-                    <Link className="public-article-card" href={`/artikel/${encodeURIComponent(article.slug)}`} key={article.id}>
-                      {article.cover_url && <img src={article.cover_url} alt="" loading="lazy" />}
-                      <span>
-                        <small>{article.category} · {article.author}</small>
-                        <strong>{article.title}</strong>
-                        <p>{article.summary}</p>
-                      </span>
-                      <ArrowUpRight size={15} />
-                    </Link>
-                  ))}
-                </div>
-              ) : <EmptyContent type="articles" message={cmsUnavailableText(content)} />}
-              <div className="article-panel-link">
-                <a
-                  href="https://smkn1bukitsundi.sch.id"
-                  target="_blank"
-                  rel="noreferrer">
-                  Kunjungi situs sekolah <ExternalLink size={14} />
-                </a>
-              </div>
-            </div>
+          <div className="showcase-sections">
+            <GallerySection
+              items={content.gallery}
+              emptyMessage={cmsUnavailableText(content)}
+            />
+            <ArticlesSection
+              items={content.articles}
+              emptyMessage={cmsUnavailableText(content)}
+            />
           </div>
-        </section>
+        </div>
 
         <section className="cta-section" aria-label="Hubungi program RPL">
           <div className="cta-pattern" aria-hidden="true" />
