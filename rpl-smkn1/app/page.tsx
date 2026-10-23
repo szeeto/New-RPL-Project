@@ -397,10 +397,10 @@ export default async function Home() {
             {content.teachers.map((teacher, index) => (
               <article className="teacher-card" key={teacher.id}>
                 <div
-                  className={`teacher-portrait ${["mint", "peach", "lavender", "blue", "yellow"][index % 5]}`}
+                  className={`teacher-portrait ${teacher.photo_url ? "has-photo" : "is-placeholder"}`}
                   aria-label={`Foto ${teacher.full_name}`}>
                   {teacher.photo_url ? (
-                    <img src={teacher.photo_url} alt={teacher.full_name} />
+                    <img className="teacher-photo" src={teacher.photo_url} alt={teacher.full_name} />
                   ) : (
                     <span>
                       {teacher.full_name
@@ -411,8 +411,12 @@ export default async function Home() {
                         .toUpperCase()}
                     </span>
                   )}
-                  <span className="portrait-index">RPL · 0{index + 1}</span>
-                  <div className="portrait-lines" />
+                  {!teacher.photo_url && (
+                    <>
+                      <span className="portrait-index">RPL · 0{index + 1}</span>
+                      <div className="portrait-lines" />
+                    </>
+                  )}
                 </div>
                 <div className="teacher-info">
                   <h3>{teacher.full_name}</h3>

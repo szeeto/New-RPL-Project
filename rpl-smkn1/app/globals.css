@@ -284,14 +284,10 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
 .teacher-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; }
 .teacher-card { overflow: hidden; background: #fff; border: 1px solid #e7e9e2; transition: transform .22s ease, box-shadow .22s ease; }
 .teacher-card:hover { transform: translateY(-5px); box-shadow: 0 14px 30px rgba(22, 53, 45, .09); }
-.teacher-portrait { position: relative; height: 175px; display: grid; place-items: center; overflow: hidden; }
-.teacher-portrait.mint { background: #e4efe7; color: #457c69; }
-.teacher-portrait.peach { background: #f2e6dc; color: #a46d53; }
-.teacher-portrait.lavender { background: #e9e7f1; color: #6b6392; }
-.teacher-portrait.blue { background: #e3ecee; color: #507a80; }
-.teacher-portrait.yellow { background: #eeeddb; color: #878046; }
-.teacher-portrait > span:first-child { position: relative; z-index: 1; width: 78px; height: 78px; display: grid; place-items: center; border: 1px solid currentColor; border-radius: 50%; font-family: Georgia, serif; font-size: 24px; }
-.teacher-portrait > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.teacher-portrait { position: relative; width: 100%; aspect-ratio: 4 / 5; display: grid; place-items: center; overflow: hidden; }
+.teacher-portrait.is-placeholder { background: #e4efe7; color: #457c69; }
+.teacher-portrait.is-placeholder > span:first-child { position: relative; z-index: 1; width: 78px; height: 78px; display: grid; place-items: center; border: 1px solid currentColor; border-radius: 50%; font-family: Georgia, serif; font-size: 24px; }
+.teacher-photo { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
 .portrait-index { position: absolute; bottom: 13px; left: 13px; z-index: 1; color: currentColor; font-family: Consolas, monospace; font-size: 8px; letter-spacing: .13em; opacity: .72; }
 .portrait-lines { position: absolute; inset: 0; opacity: .3; background: repeating-linear-gradient(135deg, transparent 0 16px, currentColor 17px, transparent 18px); mask-image: radial-gradient(ellipse, transparent 13%, #000 100%); }
 .teacher-info { min-height: 98px; padding: 15px 13px 14px; }
@@ -421,7 +417,6 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
   .hero-visual { transform: scale(.91); transform-origin: right center; }
   .about-layout, .faq-layout { gap: 55px; }
   .teacher-grid { grid-template-columns: repeat(3, 1fr); }
-  .teacher-portrait { height: 200px; }
   .public-gallery-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 @media (max-width: 760px) {
@@ -479,8 +474,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
   .teachers-section { padding-top: 79px; padding-bottom: 83px; }
   .teachers-heading { display: block; margin-bottom: 23px; }
   .teacher-count { margin-top: 15px; }
-  .teacher-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .teacher-portrait { height: clamp(125px, 35vw, 190px); }
+  .teacher-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
   .teacher-info { min-height: 104px; padding: 12px 10px; }
   .teacher-info h3 { font-size: 11px; }
   .teacher-info p { font-size: 9px; }
@@ -512,6 +506,9 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
   .footer-brand { grid-column: 1 / -1; }
   .footer-contact { grid-column: 1 / -1; }
   .footer-bottom { min-height: 60px; padding: 13px 22px; font-size: 8px; }
+}
+@media (max-width: 560px) {
+  .teacher-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 380px) {
   .hero-inner { width: calc(100% - 36px); }
